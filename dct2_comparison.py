@@ -6,7 +6,7 @@ from numpy.typing import NDArray
 from scipy.fft import dctn, dct
 import matplotlib.pyplot as plt
 
-from core.my_dct2 import Calcolous
+from core.my_dct2_and_idct2 import Calcolous
 
 
 class DctUtilities:

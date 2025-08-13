@@ -4,13 +4,12 @@ from numpy._typing import NDArray
 class Calcolous:
 
     @staticmethod
-    def dct2(f_mat: NDArray[np.float64]):
+    def dct2(f_mat: NDArray[float]):
 
         n = np.shape(f_mat)[0]
 
         # calcolo la matrice DCT monodimensionale
         D = Calcolous.__compute_dct(n)
-
         c_mat = f_mat.copy()
 
         # DCT1 per colonne
@@ -37,3 +36,22 @@ class Calcolous:
                 D[k, i] = alpha_vect[k] * np.cos((k) * np.pi * (2 * (i + 1) - 1) / (2 * n))
 
         return D
+
+    @staticmethod
+    def idct2(c_mat: NDArray[float]):
+
+        n = c_mat.shape[0]
+
+        # calcolo la matrice DCT monodimensionale
+        D = Calcolous.__compute_dct(n)
+        f_mat = c_mat.copy()
+
+        # IDCT1 per colonne
+        for j in range(n):
+            f_mat[:, j] = np.dot(D.T, f_mat[:, j])
+
+        # IDCT1 per righe
+        for i in range(n):
+            f_mat[i, :] = np.dot(D.T, f_mat[i, :].T).T
+
+        return f_mat
