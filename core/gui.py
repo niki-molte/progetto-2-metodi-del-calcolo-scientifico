@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 from PIL import Image
 import numpy as np
+from numpy.typing import NDArray
 from matplotlib import pyplot as plt
 
 np.set_printoptions(threshold=np.inf, linewidth=400)
@@ -137,6 +138,109 @@ class Gui:
 
         return True
 
+    def __make_blocks(self, pixel_matrix: NDArray[float]):
+        # creo le sottomatrici di dimensione F
+        # e nel caso scarto l'eccesso. In blocks
+        # ci sono i blocchi FxF e in remainder
+        # gli avanzi
+        blocks = []
+        remainder_blocks = []
+        h, w = pixel_matrix.shape
+
+        for i in range(0, h, self.F):
+            for j in range(0, w, self.F):
+
+                # prendo la riga che va da i a i + F, se
+                # l'immagine non è divisibile con il blocco
+                # allora scarto. Questo è possibile grazie
+                # alla funzione min.
+                block = pixel_matrix[i:min(i + self.F, h), j:min(j + self.F, w)]
+
+                if block.shape == (self.F, self.F):
+                    blocks.append(block)
+                else:
+                    remainder_blocks.append(block)
+
+        return blocks, remainder_blocks
+
+    def __make_transform(self, idct2_block):
+        for i in range(self.F):
+            for j in range(self.F):
+                if idct2_block[i, j] < 0:
+                    idct2_block[i, j] = 0
+                elif idct2_block[i, j] > 255:
+                    idct2_block[i, j] = 255
+
+        return idct2_block
+
+    def __compress(self, blocks: list):
+
+        # applico la DCT2 ai singoli blocchi
+        # dell'immagine e successivamente idct2
+        dct2_blocks = []
+        idct2_blocks = []
+        frequency_cut_block = []
+        for block in blocks:
+            dct2_block = Calcolous.dct2(block)
+            dct2_blocks.append(dct2_block)
+
+            # taglio le frequenze
+            cut_block = dct2_block
+            for k in range(self.F):
+                for l in range(self.F):
+                    if k + l >= self.d:
+                        cut_block[k, l] = 0.0
+
+            frequency_cut_block.append(cut_block)
+
+            # calcolo la idct2
+            idct2_block = Calcolous.idct2(cut_block)
+
+            # eseguo le trasformazioni in range
+            # necessarie
+            idct2_transformed_block = self.__make_transform(idct2_block)
+            idct2_blocks.append(idct2_transformed_block)
+
+        return idct2_blocks
+
+    def __make_compressed_img(self, idct2_blocks):
+
+        # blocchi non tagliati vengono
+        # salvati come intero
+        num_blocchi_righe = self.image.height // self.F
+        num_blocchi_col = self.image.width // self.F
+
+        compressed_img = np.zeros((num_blocchi_righe * self.F, num_blocchi_col * self.F), dtype=float)
+
+        index = 0
+        for i in range(num_blocchi_righe):
+            for j in range(num_blocchi_col):
+                compressed_img[i * self.F:(i + 1) * self.F, j * self.F:(j + 1) * self.F] = idct2_blocks[index]
+                index += 1
+
+        return compressed_img
+
+    def __make_imgs_plot(self, img, compressed_img):
+        img1 = np.array(Image.fromarray(img.astype(np.uint8)))
+        img2 = np.array(Image.fromarray(compressed_img.astype(np.uint8)))
+
+        fig1 = plt.figure()
+        plt.imshow(img1, cmap='gray')
+        plt.title("Immagine originale")
+        plt.axis('off')
+
+        fig2 = plt.figure()
+        plt.imshow(img2, cmap='gray')
+        plt.title(f"Immagine compressa\nF: {self.F}, d: {self.d}")
+        plt.axis('off')
+
+        plt.show(block=False)
+
+    def __make_frequency_plot(self, img, compressed_img):
+        #TODO
+        pass
+
+
     def __start_compression(self):
 
         if self.__check_input():
@@ -149,106 +253,23 @@ class Gui:
                 f"F: {self.F}, d: {self.d}"
             )
 
+            print("Inizio della compressione immagine")
+
             # carico l'immagine e la converto in scala di grigio
             # per ottenere una matrice 2D e la carico in numpy
             img = self.image.convert("L")
             pixel_matrix = np.array(img, dtype=float)
 
-            # creo le sottomatrici di dimensione F
-            # e nel caso scarto l'eccesso. In blocks
-            # ci sono i blocchi FxF e in remainder
-            # gli avanzi
-            blocks = []
-            remainder_blocks = []
-            h, w = pixel_matrix.shape
+            # creo i vari blocchetti di dimensione FxF
+            # sfruttando l'immagine
+            blocks, remainder_blocks = self.__make_blocks(pixel_matrix)
 
-            for i in range(0, h, self.F):
-                for j in range(0, w, self.F):
+            idct2_blocks = self.__compress(blocks)
 
-                    # prendo la riga che va da i a i + F, se
-                    # l'immagine non è divisibile con il blocco
-                    # allora scarto. Questo è possibile grazie
-                    # alla funzione min.
-                    block = pixel_matrix[i:min(i + self.F, h), j:min(j + self.F, w)]
+            print("Compressione terminata")
 
-                    if block.shape == (self.F, self.F):
-                        blocks.append(block)
-                    else:
-                        remainder_blocks.append(block)
-
-            # applico la DCT2 ai singoli blocchi
-            # dell'immagine e successivamente idct2
-            dct2_blocks = []
-            idct2_blocks = []
-            frequency_cut_block =[]
-            for block in blocks:
-                dct2_block = Calcolous.dct2(block)
-                dct2_blocks.append(dct2_block)
-
-                cut_block = dct2_block
-                for k in range(self.F):
-                    for l in range(self.F):
-                        if k + l >= self.d:
-                            cut_block[k, l] = 0.0
-
-
-                frequency_cut_block.append(cut_block)
-
-                # arrotondo all'intero più vicino
-                # le idct2 e sistemo i valori al
-                # loro interno.
-                idct2_block = np.round(Calcolous.idct2(cut_block))
-
-                for i in range(self.F):
-                    for j in range(self.F):
-                        if idct2_block[i, j] < 0:
-                            idct2_block[i, j] = 0
-                        elif idct2_block[i, j] > 255:
-                            idct2_block[i, j] = 255
-
-                idct2_blocks.append(idct2_block)
-
-            H, W = self.image.height, self.image.width
-
-            # numero di blocchi pieni
-            num_blocchi_righe = H // self.F
-            num_blocchi_col = W // self.F
-
-            compressed_img = np.zeros((num_blocchi_righe * self.F, num_blocchi_col * self.F), dtype=float)
-
-            index = 0
-            for i in range(num_blocchi_righe):
-                for j in range(num_blocchi_col):
-                    compressed_img[i * self.F:(i + 1) * self.F, j * self.F:(j + 1) * self.F] = idct2_blocks[index]
-                    index += 1
-
-            img1_array = np.array(Image.fromarray(pixel_matrix.astype(np.uint8)))
-            img2_array = np.array(Image.fromarray(compressed_img.astype(np.uint8)))
-
-            fig1 = plt.figure()
-            plt.imshow(img1_array, cmap='gray')
-            plt.title("Immagine originale")
-            plt.axis('off')
-
-            fig2 = plt.figure()
-            plt.imshow(img2_array, cmap='gray')
-            plt.title(f"Immagine compressa\nF: {self.F}, d: {self.d}")
-            plt.axis('off')
-
-            plt.show(block=False)
-
-
-
-
-
-
-
-
-
-
-
-
-
+            compressed_img = self.__make_compressed_img(idct2_blocks)
+            self.__make_imgs_plot(pixel_matrix, compressed_img)
 
 
 
