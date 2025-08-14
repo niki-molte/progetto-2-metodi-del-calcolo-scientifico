@@ -1,13 +1,14 @@
-import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 from PIL import Image
 import numpy as np
 from numpy.typing import NDArray
 from matplotlib import pyplot as plt
 
-np.set_printoptions(threshold=np.inf, linewidth=400)
 import os
-from core.my_dct2_and_idct2 import Calcolous
+
+from core.compression_utils import *
+from core.file_utils import select_file
+from core.plot_utils import *
 
 
 class Gui:
@@ -67,45 +68,27 @@ class Gui:
         frame.columnconfigure(0, weight=1)
         frame.columnconfigure(1, weight=2)
 
-    # gestisce l'apertura e la selezione del file .bmp
-    # si apre il filedialog nella directory home.
+
+
     def __select_file(self):
-        file_path = filedialog.askopenfilename(
-            initialdir=os.path.expanduser("~"),
-            filetypes=[("Bitmap Files", "*.bmp")],
-            title="Seleziona un file BMP"
-        )
+        select_file(self)
 
-        # se file path non è una stringa non vuota
-        # ed è un file
-        if file_path and os.path.isfile(file_path):
-            self.file_path = file_path
-            try:
+    def __start_compression(self):
+        if self.__check_input():
+            messagebox.showinfo("Avvio", f"Compressione avviata con:\nF: {self.F}, d: {self.d}")
+            img = self.image.convert("L")
+            pixel_matrix = np.array(img, dtype=float)
 
-                # apre l'immagine e legge la sua dimensione
-                # per limitare F. Si presuppone che le immagini
-                # siano quadrate
-                with Image.open(file_path) as img:
-                    self.image = img.copy()
-                    if img.width <= img.height:
-                        self.max_F = img.width
-                    else:
-                        self.max_F = img.height
+            blocks, _ = make_blocks(pixel_matrix, self.F)
+            idct2_blocks, var_img, var_block_img, index = compress(blocks, self.F, self.d)
+            compressed_img = make_compressed_img(idct2_blocks, self.F, self.image.width, self.image.height)
 
-                # se selezionato il file viene mostrato un
-                # messaggio di correttezza
-                messagebox.showinfo(
-                    "File selezionato",
-                    f"Hai selezionato:\n{os.path.basename(file_path)}\n"
-                    f"Larghezza immagine: {self.max_F} px"
-                )
+            compressed_blocks, _ = make_blocks(compressed_img, self.F)
+            _, var_compressed_img, var_block_compressed_img, compressed_index = compress(compressed_blocks, self.F, self.d)
 
-            # se si scatena eccezione viene sollevato
-            # l'errore e mostrato a schermo
-            except Exception as e:
-                messagebox.showerror("Errore", f"impossibile leggere l'immagine: {e}")
-                self.file_path = None
-                self.max_F = None
+            make_imgs_plot(pixel_matrix, compressed_img, self.F, self.d)
+            make_frequency_plot(var_img, var_block_img, index, var_compressed_img, var_block_compressed_img, compressed_index, self.image.width, self.F)
+
 
     def __check_input(self):
 
@@ -137,143 +120,3 @@ class Gui:
             return False
 
         return True
-
-    def __make_blocks(self, pixel_matrix: NDArray[float]):
-        # creo le sottomatrici di dimensione F
-        # e nel caso scarto l'eccesso. In blocks
-        # ci sono i blocchi FxF e in remainder
-        # gli avanzi
-        blocks = []
-        remainder_blocks = []
-        h, w = pixel_matrix.shape
-
-        for i in range(0, h, self.F):
-            for j in range(0, w, self.F):
-
-                # prendo la riga che va da i a i + F, se
-                # l'immagine non è divisibile con il blocco
-                # allora scarto. Questo è possibile grazie
-                # alla funzione min.
-                block = pixel_matrix[i:min(i + self.F, h), j:min(j + self.F, w)]
-
-                if block.shape == (self.F, self.F):
-                    blocks.append(block)
-                else:
-                    remainder_blocks.append(block)
-
-        return blocks, remainder_blocks
-
-    def __make_transform(self, idct2_block):
-        for i in range(self.F):
-            for j in range(self.F):
-                if idct2_block[i, j] < 0:
-                    idct2_block[i, j] = 0
-                elif idct2_block[i, j] > 255:
-                    idct2_block[i, j] = 255
-
-        return idct2_block
-
-    def __compress(self, blocks: list):
-
-        # applico la DCT2 ai singoli blocchi
-        # dell'immagine e successivamente idct2
-        dct2_blocks = []
-        idct2_blocks = []
-        frequency_cut_block = []
-        for block in blocks:
-            dct2_block = Calcolous.dct2(block)
-            dct2_blocks.append(dct2_block)
-
-            # taglio le frequenze
-            cut_block = dct2_block
-            for k in range(self.F):
-                for l in range(self.F):
-                    if k + l >= self.d:
-                        cut_block[k, l] = 0.0
-
-            frequency_cut_block.append(cut_block)
-
-            # calcolo la idct2
-            idct2_block = Calcolous.idct2(cut_block)
-
-            # eseguo le trasformazioni in range
-            # necessarie
-            idct2_transformed_block = self.__make_transform(idct2_block)
-            idct2_blocks.append(idct2_transformed_block)
-
-        return idct2_blocks
-
-    def __make_compressed_img(self, idct2_blocks):
-
-        # blocchi non tagliati vengono
-        # salvati come intero
-        num_blocchi_righe = self.image.height // self.F
-        num_blocchi_col = self.image.width // self.F
-
-        compressed_img = np.zeros((num_blocchi_righe * self.F, num_blocchi_col * self.F), dtype=float)
-
-        index = 0
-        for i in range(num_blocchi_righe):
-            for j in range(num_blocchi_col):
-                compressed_img[i * self.F:(i + 1) * self.F, j * self.F:(j + 1) * self.F] = idct2_blocks[index]
-                index += 1
-
-        return compressed_img
-
-    def __make_imgs_plot(self, img, compressed_img):
-        img1 = np.array(Image.fromarray(img.astype(np.uint8)))
-        img2 = np.array(Image.fromarray(compressed_img.astype(np.uint8)))
-
-        fig1 = plt.figure()
-        plt.imshow(img1, cmap='gray')
-        plt.title("Immagine originale")
-        plt.axis('off')
-
-        fig2 = plt.figure()
-        plt.imshow(img2, cmap='gray')
-        plt.title(f"Immagine compressa\nF: {self.F}, d: {self.d}")
-        plt.axis('off')
-
-        plt.show(block=False)
-
-    def __make_frequency_plot(self, img, compressed_img):
-        #TODO
-        pass
-
-
-    def __start_compression(self):
-
-        if self.__check_input():
-
-            # avviso che la compressione è stata avviata.
-            messagebox.showinfo(
-                "Avvio",
-                f"Compressione avviata con:\n"
-                f"File: {os.path.basename(self.file_path)}\n"
-                f"F: {self.F}, d: {self.d}"
-            )
-
-            print("Inizio della compressione immagine")
-
-            # carico l'immagine e la converto in scala di grigio
-            # per ottenere una matrice 2D e la carico in numpy
-            img = self.image.convert("L")
-            pixel_matrix = np.array(img, dtype=float)
-
-            # creo i vari blocchetti di dimensione FxF
-            # sfruttando l'immagine
-            blocks, remainder_blocks = self.__make_blocks(pixel_matrix)
-
-            idct2_blocks = self.__compress(blocks)
-
-            print("Compressione terminata")
-
-            compressed_img = self.__make_compressed_img(idct2_blocks)
-            self.__make_imgs_plot(pixel_matrix, compressed_img)
-
-
-
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = Gui(root)
-    root.mainloop()
