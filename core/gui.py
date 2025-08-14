@@ -1,10 +1,4 @@
 from tkinter import filedialog, messagebox, ttk
-from PIL import Image
-import numpy as np
-from numpy.typing import NDArray
-from matplotlib import pyplot as plt
-
-import os
 
 from core.compression_utils import *
 from core.file_utils import select_file
