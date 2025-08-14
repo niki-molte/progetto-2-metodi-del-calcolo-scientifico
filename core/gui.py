@@ -1,4 +1,4 @@
-from tkinter import filedialog, messagebox, ttk
+from tkinter import messagebox, ttk
 
 from core.compression_utils import *
 from core.file_utils import select_file
