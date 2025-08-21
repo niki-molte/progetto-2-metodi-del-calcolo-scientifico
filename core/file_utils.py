@@ -19,8 +19,7 @@ def select_file(gui_instance):
         try:
 
             # apre l'immagine e legge la sua dimensione
-            # per limitare F. Si presuppone che le immagini
-            # siano quadrate
+            # per limitare F.
             with Image.open(file_path) as img:
                 gui_instance.image = img.copy()
                 gui_instance.max_F = min(img.width, img.height)

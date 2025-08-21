@@ -4,26 +4,7 @@ from numpy.typing import NDArray
 class Calcolous:
 
     @staticmethod
-    def dct2(f_mat: NDArray[float]):
-
-        n = np.shape(f_mat)[0]
-
-        # calcolo la matrice DCT monodimensionale
-        D = Calcolous.__compute_dct(n)
-        c_mat = f_mat.copy()
-
-        # DCT1 per colonne
-        for j in range(n):
-            c_mat[:, j] = np.dot(D, c_mat[:, j])
-
-        # DCT1 per righe
-        for j in range(n):
-            c_mat[j, :] = np.dot(D, c_mat[j, :])
-
-        return c_mat
-
-    @staticmethod
-    def __compute_dct(n: int):
+    def __dct(n: int):
 
         # creo il vettore alpha basandomi su n
         alpha_vect = np.zeros(n, dtype=float)
@@ -38,12 +19,31 @@ class Calcolous:
         return D
 
     @staticmethod
+    def dct2(f_mat: NDArray[float]):
+
+        n = np.shape(f_mat)[0]
+
+        # calcolo la matrice DCT monodimensionale
+        D = Calcolous.__dct(n)
+        c_mat = f_mat.copy()
+
+        # DCT1 per colonne
+        for j in range(n):
+            c_mat[:, j] = np.dot(D, c_mat[:, j])
+
+        # DCT1 per righe
+        for j in range(n):
+            c_mat[j, :] = np.dot(D, c_mat[j, :])
+
+        return c_mat
+
+    @staticmethod
     def idct2(c_mat: NDArray[float]):
 
         n = c_mat.shape[0]
 
         # calcolo la matrice DCT monodimensionale
-        D = Calcolous.__compute_dct(n)
+        D = Calcolous.__dct(n)
         f_mat = c_mat.copy()
 
         # IDCT1 per colonne

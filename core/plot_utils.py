@@ -29,8 +29,8 @@ def make_frequency_plot(var_img, var_block_img, index, var_img2, var_block_img2,
     ax.bar3d(X.flatten(), Y.flatten(), np.zeros_like(var_block_img).flatten(),
              0.8, 0.8, var_block_img.flatten(), shade=True)
 
-    riga_blocco = index // blocchi_per_riga
-    col_blocco = index % blocchi_per_riga
+    riga_blocco = index2 // blocchi_per_riga
+    col_blocco = index2 % blocchi_per_riga
     y_px = riga_blocco * F
     x_px = col_blocco * F
 

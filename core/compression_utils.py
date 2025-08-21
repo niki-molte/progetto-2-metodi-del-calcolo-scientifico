@@ -1,7 +1,8 @@
 import numpy as np
+from numpy.typing import NDArray
 from core.my_dct2_and_idct2 import Calcolous
 
-def make_blocks(pixel_matrix, F):
+def make_blocks(pixel_matrix: NDArray[float], F):
 
     # creo le sottomatrici di dimensione F
     # e nel caso scarto l'eccesso. In blocks
@@ -26,7 +27,7 @@ def make_blocks(pixel_matrix, F):
 
     return blocks, remainder_blocks
 
-def make_transform(idct2_block, F):
+def make_transform(idct2_block: NDArray[float], F: int):
     # corregge i range e i valori
     # nell'intervallo corretto
     for i in range(F):
@@ -37,7 +38,7 @@ def make_transform(idct2_block, F):
                 idct2_block[i, j] = 255
     return idct2_block
 
-def compress(blocks, F, d):
+def compress(blocks: list[NDArray[float]], F: int, d: int):
 
     # applico la DCT2 ai singoli blocchi
     # dell'immagine e successivamente idct2
@@ -45,6 +46,7 @@ def compress(blocks, F, d):
     max_var = 0.0
     max_var_block = None
     ret_index = 0
+
     idct2_blocks = []
     frequency_cut_block = []
     index = 0
@@ -79,7 +81,7 @@ def compress(blocks, F, d):
 
     return idct2_blocks, max_var, max_var_block, ret_index
 
-def make_compressed_img(idct2_blocks, F, image_width, image_height):
+def make_compressed_img(idct2_blocks: list[NDArray[float]], F: int, image_width: int, image_height: int):
 
     # blocchi non tagliati vengono
     # salvati come intero
