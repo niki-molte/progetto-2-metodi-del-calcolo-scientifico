@@ -6,10 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="893dd835-8901-43cd-a23f-e3b9dd3d7cb7" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/compression_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/compression_utils.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/file_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/file_utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/my_dct2_and_idct2.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/my_dct2_and_idct2.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/plot_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/plot_utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dct2_comparison.py" beforeDir="false" afterPath="$PROJECT_DIR$/dct2_comparison.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,7 +65,7 @@
       <recent name="$PROJECT_DIR$" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.main">
+  <component name="RunManager" selected="Python.dct2_comparison">
     <configuration name="dct2_comparison" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="progetto 2 metodi del calcolo scientifico" />
       <option name="ENV_FILES" value="" />

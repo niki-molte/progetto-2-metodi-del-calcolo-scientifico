@@ -2,6 +2,7 @@ from tkinter import filedialog, messagebox
 from PIL import Image
 import os
 
+
 def select_file(gui_instance):
 
     # gestisce l'apertura e la selezione del file .bmp
@@ -29,7 +30,8 @@ def select_file(gui_instance):
             messagebox.showinfo(
                 "File selezionato",
                 f"Hai selezionato:\n{os.path.basename(file_path)}\n"
-                f"Larghezza immagine: {gui_instance.max_F} px"
+                f"Larghezza: {img.width} px\n"
+                f"Altezza: {img.height} px"
             )
 
         # se si scatena eccezione viene sollevato

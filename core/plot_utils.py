@@ -1,8 +1,9 @@
 import numpy as np
 from PIL import Image
+from numpy.typing import NDArray
 from matplotlib import pyplot as plt
 
-def make_imgs_plot(img, compressed_img, F, d):
+def make_imgs_plot(img: NDArray[float], compressed_img: NDArray[float], F: int, d: int):
     img1 = np.array(Image.fromarray(img.astype(np.uint8)))
     img2 = np.array(Image.fromarray(compressed_img.astype(np.uint8)))
 
@@ -18,7 +19,7 @@ def make_imgs_plot(img, compressed_img, F, d):
 
     plt.show(block=False)
 
-def make_frequency_plot(var_img, var_block_img, index, var_img2, var_block_img2, index2, image_width, F):
+def make_frequency_plot(var_img: float, var_block_img: NDArray[float], var_img2: float, var_block_img2: NDArray[float], index: int, image_width: int, F: int):
     blocchi_per_riga = image_width // F
 
     fig1 = plt.figure()
@@ -29,8 +30,8 @@ def make_frequency_plot(var_img, var_block_img, index, var_img2, var_block_img2,
     ax.bar3d(X.flatten(), Y.flatten(), np.zeros_like(var_block_img).flatten(),
              0.8, 0.8, var_block_img.flatten(), shade=True)
 
-    riga_blocco = index2 // blocchi_per_riga
-    col_blocco = index2 % blocchi_per_riga
+    riga_blocco = index // blocchi_per_riga
+    col_blocco = index % blocchi_per_riga
     y_px = riga_blocco * F
     x_px = col_blocco * F
 
@@ -44,8 +45,8 @@ def make_frequency_plot(var_img, var_block_img, index, var_img2, var_block_img2,
     ax.bar3d(X.flatten(), Y.flatten(), np.zeros_like(var_img2).flatten(),
              0.8, 0.8, var_block_img2.flatten(), shade=True)
 
-    riga_blocco = index2 // blocchi_per_riga
-    col_blocco = index2 % blocchi_per_riga
+    riga_blocco = index // blocchi_per_riga
+    col_blocco = index % blocchi_per_riga
     y_px = riga_blocco * F
     x_px = col_blocco * F
 

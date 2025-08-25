@@ -70,7 +70,7 @@ class DctUtilities:
             mat = np.random.randint(0, 256, size=(n, n), dtype=np.uint8)
             yield n, mat
 
-    def __compare_dct(self):
+    def __compare_dct(self) -> list[list[float]]:
 
         result = []
 
@@ -106,37 +106,30 @@ class DctUtilities:
         plt.plot(ns, my_dct_time, color="blue", label="my DCT")
         plt.plot(ns, library_dct_time, color="green", label="library DCT")
 
-        ref_my_dct = [n ** 3 / 1e12 for n in ns]
-        ref_library_dct = [(n ** 2 * np.log(n)) / 1e12 for n in ns]
+        # --- Curve teoriche con scaling adattato ---
+        # complessità teorica pura
+        theory_my_dct = np.array([n ** 3 for n in ns], dtype=float)
+        theory_lib_dct = np.array([n ** 2 * np.log(n) for n in ns], dtype=float)
 
-        #ref_my_dct = [n**3 for n in ns]
-        #ref_library_dct = [(n**2)*np.log(n) for n in ns]
+        # calcolo il fattore di scala (fit semplice sul punto massimo)
+        scale_my = my_dct_time[-1] / theory_my_dct[-1]
+        scale_lib = library_dct_time[-1] / theory_lib_dct[-1]
 
-        # Fattori di scala per allineare la complessità teorica
-        #c_my = my_dct_time[0] / ns[0] ** 3
-        #c_lib = library_dct_time[0] / (ns[0] ** 2 * np.log(ns[0]))
+        ref_my_dct = scale_my * theory_my_dct
+        ref_library_dct = scale_lib * theory_lib_dct
 
-        # Curve teoriche traslate
-        #ref_my_dct = [c_my * n ** 3 for n in ns]
-        #ref_library_dct = [c_lib * n ** 2 * np.log(n) for n in ns]
+        plt.plot(ns, ref_my_dct, color="red", linestyle='-.', label=r"My DCT $O(n^3)$")
+        plt.plot(ns, ref_library_dct, color="red", linestyle='--', label=r"Library DCT $O(n^2 \log n)$")
 
-        #plt.plot(ns, ref_my_dct, color="red", linestyle='-.', label="my DCT reference (N^3)")
-        #plt.plot(ns, ref_library_dct, color="red", linestyle='--', label="library DCT reference (N^2Log(N))")
+        plt.xlim(right=self.max_n+5)
 
         plt.title("Confronto in termini di tempo tra \n DCT implementata e DCT da libreria")
-        plt.ylabel("Tempo(s)")
+        plt.ylabel("Tempo (s)")
         plt.xlabel("Dimensione della matrice")
         plt.yscale('log')
 
         plt.legend()
         plt.show()
-
-
-
-
-
-
-
 
 
 # blocco 8x8 su cui vengono eseguiti i test per
@@ -153,7 +146,7 @@ block = np.array([
     [87, 149, 57, 192, 65, 129, 178, 228]
 ], dtype=float)
 
-util = DctUtilities(max_n=1500)
+util = DctUtilities(max_n=3000)
 
 # calcolo la DCT2 con la libreria implementata
 dct2_my = Calcolous.dct2(f_mat=block)
