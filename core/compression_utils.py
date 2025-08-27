@@ -53,13 +53,19 @@ def compress(blocks: list[NDArray[float]], F: int, d: int):
 
     for block in blocks:
         dct2_block = Calcolous.dct2(block)
-        index += 1
-        var = np.var(block)
+        var = np.var(block, dtype=float)
+
+        # round necessario per evitare
+        # fluttuazioni
+        var = round(var, 15)
+
         if var >= max_var:
             max_var = var
             max_var_block = block
             ret_index = index
 
+
+        index += 1
         dct2_blocks.append(dct2_block)
 
         # taglio le frequenze con
@@ -79,7 +85,7 @@ def compress(blocks: list[NDArray[float]], F: int, d: int):
         idct2_transformed_block = make_transform(idct2_block, F)
         idct2_blocks.append(idct2_transformed_block)
 
-    return idct2_blocks, max_var, max_var_block, ret_index
+    return idct2_blocks, dct2_blocks, max_var, max_var_block, ret_index
 
 def make_compressed_img(idct2_blocks: list[NDArray[float]], F: int, image_width: int, image_height: int):
 

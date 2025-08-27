@@ -76,16 +76,16 @@ class Gui:
             print(f"Suddivisione dell'immagine in blocchi {self.F}x{self.F}")
             blocks, _ = make_blocks(pixel_matrix, self.F)
             print("Calcolo della DCT dell'immagine originale")
-            idct2_blocks, var_img, var_block_img, index = compress(blocks, self.F, self.d)
+            idct2_blocks, dct2_blocks, var_img, var_block_img, index = compress(blocks, self.F, self.d)
             print("Ricostruzione dell'immagine compressa")
             compressed_img = make_compressed_img(idct2_blocks, self.F, self.image.width, self.image.height)
 
             print("Calcolo della DCT dell'immagine compressa")
             compressed_blocks, _ = make_blocks(compressed_img, self.F)
-            _, var_compressed_img, var_block_compressed_img, compressed_index = compress(compressed_blocks, self.F, self.d)
+            compressed_idct2_blocks, compressed_dct2_blocks, var_compressed_img, var_block_compressed_img, compressed_index = compress(compressed_blocks, self.F, self.d)
             print("Creazione dei plot")
             make_imgs_plot(pixel_matrix, compressed_img, self.F, self.d)
-            make_frequency_plot(var_img, var_block_img, index, var_compressed_img, var_block_compressed_img, compressed_index, self.image.width, self.F)
+            make_pixel_plot(var_img, blocks[compressed_index], var_compressed_img, compressed_idct2_blocks[compressed_index], compressed_index, self.image.width, self.F)
 
 
     def __check_input(self):
