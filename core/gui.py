@@ -75,12 +75,12 @@ class Gui:
 
             print(f"Suddivisione dell'immagine in blocchi {self.F}x{self.F}")
             blocks, _ = make_blocks(pixel_matrix, self.F)
-            print("Calcolo della DCT dell'immagine originale")
+            print("Calcolo della DCT2 e IDCT2 dell'immagine originale")
             idct2_blocks, dct2_blocks, var_img, var_block_img, index = compress(blocks, self.F, self.d)
             print("Ricostruzione dell'immagine compressa")
             compressed_img = make_compressed_img(idct2_blocks, self.F, self.image.width, self.image.height)
 
-            print("Calcolo della DCT dell'immagine compressa")
+            print("Calcolo della DCT2 dell'immagine compressa")
             compressed_blocks, _ = make_blocks(compressed_img, self.F)
             compressed_idct2_blocks, compressed_dct2_blocks, var_compressed_img, var_block_compressed_img, compressed_index = compress(compressed_blocks, self.F, self.d)
             print("Creazione dei plot")
