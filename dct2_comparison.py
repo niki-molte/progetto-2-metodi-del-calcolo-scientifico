@@ -1,10 +1,12 @@
 import time
 
+import matplotlib
 import numpy as np
 from numpy.typing import NDArray
 
 from scipy.fft import dctn, dct
 import matplotlib.pyplot as plt
+matplotlib.use('TkAgg')
 
 from core.my_dct2_and_idct2 import Calcolous
 

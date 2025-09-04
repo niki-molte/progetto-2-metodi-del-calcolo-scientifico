@@ -1,7 +1,9 @@
+import matplotlib
 import numpy as np
 from PIL import Image
 from numpy.typing import NDArray
 from matplotlib import pyplot as plt
+matplotlib.use('TkAgg')
 from matplotlib import cm
 
 def make_imgs_plot(img: NDArray[float], compressed_img: NDArray[float], F: int, d: int):
