@@ -1,6 +1,6 @@
 # Progetto Metodi del Calcolo Scientifico — progetto 2
 
-Questo progetto implementa un algoritmo di compressione di immagini in formato ```.bmp``` che sfrutta DCT e IDCT basate sulla trasformata di Fourier.
+Questo progetto implementa un algoritmo di compressione di immagini in formato ```.bmp``` che sfrutta DCT2 e IDCT2 basate sulla trasformata di Fourier.
 
 ## Documentazione
 
@@ -57,4 +57,13 @@ Aprire un terminale nella stessa schermata della directory in cui è stata clona
 ```  
 
 In questo modo verrà mostrata un'interfaccia grafica che permetterà di definire i parametri di compressione e selezionare l'immagine in formato ```.bmp``` da comprimere. Al termine dell'algoritmo verranno mostrati i risultati ottenuti.
+
+Inoltre è possibile eseguire un confronto tra la DCT2 implementata da ```Scipy``` che sfrutta la trasformata di Fourier Fast e la DCT2 utilizzata all'interno del progetto. Basterà eseguire il seguente comando:
+
+```bash
+    python3 dct2_comparison.py
+```
+
+Al termine dell'esecuzione verrà mostrato un grafico comparativo con le complessità temporali asintotiche.
+
 ---
